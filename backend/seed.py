@@ -1,4 +1,5 @@
 from datetime import timedelta
+import os
 from sqlalchemy import select
 from .db import SessionLocal, now
 from .models import *
@@ -12,6 +13,9 @@ def seed():
         if db.get(Role, 1):
             db.rollback()
             return
+        if not os.getenv('DATABASE_URL') and os.getenv('ALLOW_DEMO_SEED') != '1':
+            db.rollback()
+            raise RuntimeError('Демо-пользователей можно создать в Turso только с ALLOW_DEMO_SEED=1')
         db.add_all([Role(id=1, name='admin'), Role(id=2, name='client')])
         db.flush()
         for login, password, name, role in [('admin', 'AdminDemo!2026', 'Администратор', 1), ('anna', 'AnnaDemo!2026', 'Анна Смирнова', 2), ('mikhail', 'MikhailDemo!2026', 'Михаил Волков', 2)]:

@@ -4,7 +4,7 @@ from openai import OpenAI, AuthenticationError, RateLimitError, BadRequestError,
 from .config import OPENAI_TRANSCRIPTION_MODEL
 
 TRANSCRIPTION_MODEL = OPENAI_TRANSCRIPTION_MODEL
-MAX_AUDIO_BYTES = 10 * 1024 * 1024
+MAX_AUDIO_BYTES = 4 * 1024 * 1024
 AUDIO_FORMATS = {'audio/webm': 'webm', 'video/webm': 'webm', 'audio/mp4': 'mp4',
                  'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/mpeg': 'mp3'}
 

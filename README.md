@@ -17,13 +17,7 @@ powershell -ExecutionPolicy Bypass -File .\Start.ps1
 
 Другой порт: `powershell -ExecutionPolicy Bypass -File .\Start.ps1 -Port 8010`.
 
-| Логин | Пароль | Роль |
-|---|---|---|
-| admin | AdminDemo!2026 | Администратор |
-| anna | AnnaDemo!2026 | Анна Смирнова |
-| mikhail | MikhailDemo!2026 | Михаил Волков |
-
-Это демонстрационные пароли для локального учебного запуска. В БД находятся только Argon2id-хеши.
+Учётные записи в Turso используют отдельные пароли. Локальный файл `data/vercel_credentials.txt` хранит актуальные данные для входа после их смены и не попадает в Git. Демо-пользователи в пустой базе Turso создаются только при явном `ALLOW_DEMO_SEED=1`.
 
 ## Что реализовано
 

@@ -10,7 +10,6 @@ from backend.main import app
 from backend.models import *
 from backend.seed import seed
 from backend.services import balance, purchase, prepare_action, book
-from backend.security import crypt
 from backend import agent
 
 def proposal(client, kind, target):
@@ -133,12 +132,37 @@ def test_admin_block_adjust_progress_archive(admin, anna):
     assert admin.patch('/api/admin/users/2', json={'active':False}).status_code == 200
     assert anna.get('/api/me/learning').status_code == 401
 
-def test_key_dpapi_roundtrip_and_no_disclosure(admin):
-    encrypted = crypt('secret-test-key')
-    assert 'secret-test-key' not in encrypted
-    assert crypt(encrypted, True) == 'secret-test-key'
-    assert admin.put('/api/admin/settings', json={'api_key':'secret-test-key','model':'example-model'}).status_code == 200
-    assert 'secret-test-key' not in admin.get('/api/admin/settings').text
+def test_admin_settings_are_read_only_and_do_not_disclose_key(admin):
+    settings = admin.get('/api/admin/settings')
+    assert settings.status_code == 200
+    assert 'api_key' not in settings.json()
+    assert admin.put('/api/admin/settings', json={'api_key': 'secret-test-key'}).status_code == 405
+
+
+def test_vercel_same_origin_and_secure_session(monkeypatch):
+    monkeypatch.setenv('VERCEL', '1')
+    client = TestClient(app, base_url='https://dz6.vercel.app',
+                        headers={'origin': 'https://dz6.vercel.app'})
+    login = client.post('/api/auth/login', json={'login': 'anna', 'password': 'AnnaDemo!2026'})
+    assert login.status_code == 200
+    assert 'secure' in login.headers['set-cookie'].lower()
+    client.headers['x-csrf-token'] = login.json()['csrf']
+    assert client.post('/api/conversations').status_code == 200
+    client.headers['origin'] = 'https://other.vercel.app'
+    assert client.post('/api/conversations').status_code == 403
+
+
+def test_only_stale_processing_message_is_recoverable(anna):
+    cid = anna.post('/api/conversations').json()['id']
+    with SessionLocal() as db:
+        db.add_all([
+            Message(conversation_id=cid, role='user', content='старый', status='processing',
+                    created_at=now() - timedelta(minutes=11)),
+            Message(conversation_id=cid, role='user', content='новый', status='processing'),
+        ])
+        db.commit()
+    messages = anna.get(f'/api/conversations/{cid}').json()['messages']
+    assert [message['status'] for message in messages] == ['error', 'processing']
 
 class FakeResponses:
     def __init__(self, calls, final='Вот данные вашего обучения.'):
@@ -253,14 +277,17 @@ def test_balance_exhaustion_and_admin_reschedule(anna,admin):
     assert confirm(anna,proposal(anna,'book',other['id'])).status_code == 409
 
 def test_real_settings_flow_with_mock_provider(admin,monkeypatch):
-    from backend import main
+    from backend import main, config
+    monkeypatch.setattr(main, 'OPENAI_API_KEY', 'fake-key')
+    monkeypatch.setattr(main, 'OPENAI_MODEL', 'test-model')
+    monkeypatch.setattr(config, 'OPENAI_API_KEY', 'fake-key')
+    monkeypatch.setattr(config, 'OPENAI_MODEL', 'test-model')
     monkeypatch.setattr(main,'OpenAI',lambda **kw:SimpleNamespace(models=SimpleNamespace(list=lambda:[SimpleNamespace(id='test-model')]),responses=FakeResponses([('get_catalog',{})])))
-    assert admin.put('/api/admin/settings',json={'api_key':'fake-key','model':'test-model'}).status_code == 200
+    assert admin.get('/api/admin/settings').json()['model'] == 'test-model'
     assert admin.get('/api/admin/models').json()==['test-model']
     assert admin.post('/api/admin/settings/test').json()['ok']
     assert admin.get('/api/admin/settings').json()['verified']
-    assert admin.put('/api/admin/settings',json={'model':'another-model'}).status_code == 200
-    assert not admin.get('/api/admin/settings').json()['verified']
+    assert admin.put('/api/admin/settings',json={'model':'another-model'}).status_code == 405
 
 def test_new_topic_recalculates_completed_course(admin,anna):
     assert admin.post('/api/admin/topics',json={'course_id':1,'title':'Новая тема','position':3}).status_code == 200

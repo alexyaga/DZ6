@@ -1,5 +1,6 @@
 import re
 import secrets
+import os
 from datetime import timedelta
 
 from argon2 import PasswordHasher
@@ -52,6 +53,7 @@ def new_session(db, user, response):
                            csrf=secrets.token_urlsafe(32), expires_at=now() + timedelta(days=7))
     db.add(session)
     db.commit()
-    response.set_cookie('school_session', session.id, httponly=True, samesite='strict', max_age=604800)
+    response.set_cookie('school_session', session.id, httponly=True, samesite='strict',
+                        secure=bool(os.getenv('VERCEL')), max_age=604800)
     return {**user_info(db, user), 'csrf': session.csrf}
 
