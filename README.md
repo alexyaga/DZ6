@@ -19,6 +19,14 @@ powershell -ExecutionPolicy Bypass -File .\Start.ps1
 
 Учётные записи в Turso используют отдельные пароли. Локальный файл `data/vercel_credentials.txt` хранит актуальные данные для входа после их смены и не попадает в Git. Демо-пользователи в пустой базе Turso создаются только при явном `ALLOW_DEMO_SEED=1`.
 
+## Публикация на Vercel
+
+Проект `dz6` подключён к этому репозиторию. `pyproject.toml` задаёт FastAPI и сборку интерфейса; Production доступен по адресу [dz6-nine.vercel.app](https://dz6-nine.vercel.app).
+
+Переменные Production в Vercel: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_TRANSCRIPTION_MODEL`, `APP_ORIGINS`. Значения берутся из локального `.env` и вводятся в настройках Vercel, не в Git. Для Preview требуется отдельная база Turso; до её настройки изменения в PR можно проверять по сборке и странице, без входа в приложение.
+
+Миграции Alembic выполняются отдельно перед развёртыванием новой схемы. Сборка Vercel не меняет структуру Turso автоматически.
+
 ## Что реализовано
 
 - Регистрация клиентов, серверные сессии с HttpOnly-cookie, Origin/CSRF-проверка, блокировка аккаунтов.
