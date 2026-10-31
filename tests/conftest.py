@@ -4,6 +4,8 @@ from pathlib import Path
 
 TEST_DIR = tempfile.TemporaryDirectory(prefix='it-school-tests-')
 os.environ['DATABASE_URL'] = 'sqlite:///' + (Path(TEST_DIR.name) / 'test.db').as_posix()
+os.environ['OPENAI_API_KEY'] = ''
+os.environ['OPENAI_MODEL'] = ''
 
 import pytest
 from fastapi.testclient import TestClient

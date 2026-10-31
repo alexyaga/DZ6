@@ -6,8 +6,10 @@ from backend import speech
 def upload(client, audio=b'fake-audio', mime='audio/webm;codecs=opus'):
     return client.post('/api/ai/transcribe', content=audio, headers={'content-type': mime})
 
-def configure(admin):
-    assert admin.put('/api/admin/settings', json={'api_key':'test-speech-key','model':'chat-model'}).status_code == 200
+def configure(monkeypatch):
+    from backend import main, config
+    monkeypatch.setattr(main, 'OPENAI_API_KEY', 'test-speech-key')
+    monkeypatch.setattr(config, 'OPENAI_API_KEY', 'test-speech-key')
 
 def fake_provider(monkeypatch, text='Хочу изучать Python', error=None):
     calls = []
@@ -25,7 +27,7 @@ def fake_provider(monkeypatch, text='Хочу изучать Python', error=None
     return calls
 
 def test_transcription_uses_shared_key_and_cheap_model(anna, admin, monkeypatch):
-    configure(admin)
+    configure(monkeypatch)
     calls = fake_provider(monkeypatch)
     response = upload(anna)
     assert response.status_code == 200, response.text
@@ -47,7 +49,7 @@ def test_transcription_requires_saved_key(anna):
     assert upload(anna).status_code == 503
 
 def test_transcription_upload_validation(anna, admin, monkeypatch):
-    configure(admin)
+    configure(monkeypatch)
     calls = fake_provider(monkeypatch)
     assert upload(anna, mime='text/plain').status_code == 415
     assert upload(anna, audio=b'').status_code == 422
@@ -55,12 +57,12 @@ def test_transcription_upload_validation(anna, admin, monkeypatch):
     assert calls == []
 
 def test_transcription_empty_result(anna, admin, monkeypatch):
-    configure(admin)
+    configure(monkeypatch)
     fake_provider(monkeypatch, text='  ')
     assert upload(anna).status_code == 422
 
 def test_transcription_error_does_not_expose_secrets(anna, admin, monkeypatch):
-    configure(admin)
+    configure(monkeypatch)
     fake_provider(monkeypatch, error=RuntimeError('private provider response test-speech-key'))
     response=upload(anna)
     assert response.status_code == 502

@@ -15,7 +15,8 @@ def test_fresh_install_with_alembic_and_seed(tmp_path):
         assert db.execute('SELECT COUNT(*) FROM users').fetchone()[0] == 3
         assert db.execute('SELECT COUNT(*) FROM users WHERE role_id=1').fetchone()[0] == 1
         assert db.execute('PRAGMA foreign_key_check').fetchall() == []
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '002_multiple_admins'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '003_env_based_secrets'
+        assert db.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='app_settings'").fetchone()[0] == 0
 
 def test_multi_admin_migration_preserves_existing_school(tmp_path):
     path=tmp_path/'existing.db'
@@ -33,7 +34,7 @@ def test_multi_admin_migration_preserves_existing_school(tmp_path):
     assert result.returncode==0,result.stderr
     with sqlite3.connect(path) as db:
         assert counts==[db.execute('SELECT COUNT(*) FROM '+table).fetchone()[0] for table in ('users','purchases','messages','user_memories')]
-        assert db.execute('SELECT encrypted_key FROM app_settings').fetchone()[0]=='preserved-encrypted-key'
+        assert db.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='app_settings'").fetchone()[0]==0
         db.execute('UPDATE users SET role_id=1 WHERE id=2')
         assert db.execute('SELECT COUNT(*) FROM users WHERE role_id=1').fetchone()[0]==2
     # Downgrade must never silently demote an existing administrator.

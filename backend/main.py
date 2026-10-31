@@ -1,6 +1,8 @@
 import json
 from contextlib import asynccontextmanager
+from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, FileResponse
@@ -22,19 +24,25 @@ from .speech import transcribe_audio, MAX_AUDIO_BYTES, AUDIO_FORMATS, TRANSCRIPT
 @asynccontextmanager
 async def lifespan(app):
     # Миграции запускаются скриптом запуска; импорт приложения не меняет схему.
-    with SessionLocal() as db:
-        # Незавершённый запрос после остановки сервера можно повторить.
-        db.execute(update(Message).where(Message.status == 'processing').values(status='error'))
-        db.commit()
     yield
 
 app = FastAPI(title='IT School', lifespan=lifespan)
 ORIGINS = APP_ORIGINS
 
+
+def allowed_origin(request: Request) -> bool:
+    origin = request.headers.get('origin', '')
+    if origin in ORIGINS:
+        return True
+    parsed = urlsplit(origin)
+    # Preview, production and custom Vercel domains are allowed only for their own host.
+    return (parsed.scheme == 'https' and parsed.netloc == request.headers.get('host', '')
+            and not parsed.path and not parsed.query and not parsed.fragment)
+
 @app.middleware('http')
 async def protect_origin(request, call_next):
     if request.url.path.startswith('/api/') and request.method not in ('GET', 'HEAD', 'OPTIONS'):
-        if request.headers.get('origin') not in ORIGINS:
+        if not allowed_origin(request):
             return JSONResponse({'detail': 'Недопустимый Origin запроса'}, status_code=403)
     response = await call_next(request)
     response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -101,7 +109,7 @@ async def transcribe(request: Request, user=Depends(current_user), db=Depends(ge
     audio = bytearray()
     async for chunk in request.stream():
         if len(audio) + len(chunk) > MAX_AUDIO_BYTES:
-            raise HTTPException(413, 'Запись слишком большая. Максимальный размер — 10 МБ.')
+            raise HTTPException(413, 'Запись слишком большая. Максимальный размер — 4 МБ.')
         audio.extend(chunk)
     if not audio:
         raise HTTPException(422, 'Запись пустая. Повторите запись с микрофона.')
@@ -206,6 +214,11 @@ def new_conversation(user=Depends(current_user), db=Depends(get_db)):
     return data(c)
 
 def conversation_contents(db, conversation):
+    # A terminated function must not leave a conversation blocked forever.
+    db.execute(update(Message).where(Message.conversation_id == conversation.id,
+              Message.status == 'processing', Message.created_at < now() - timedelta(minutes=10))
+              .values(status='error'))
+    db.commit()
     result = []
     for message in db.scalars(select(Message).where(Message.conversation_id == conversation.id).order_by(Message.id)):
         result.append({**data(message), 'actions': [data(a) for a in db.scalars(select(PendingAction).where(PendingAction.message_id == message.id))],

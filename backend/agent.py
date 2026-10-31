@@ -58,7 +58,8 @@ def process_message(db, user, conversation_id, content=None, retry_id=None):
             raise HTTPException(409, 'Можно повторить только сообщение с ошибкой')
         # CAS не позволяет двум запросам одновременно повторить обработку.
         from sqlalchemy import update
-        updated = db.execute(update(Message).where(Message.id == message.id, Message.status == 'error').values(status='processing'))
+        updated = db.execute(update(Message).where(Message.id == message.id, Message.status == 'error')
+                             .values(status='processing', created_at=now()))
         if updated.rowcount != 1:
             raise HTTPException(409, 'Сообщение уже обрабатывается')
         db.refresh(message)

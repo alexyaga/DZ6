@@ -89,7 +89,7 @@ export function useVoiceInput(
       recording.ondataavailable = (event) => {
         if (!event.data.size) return;
         total += event.data.size;
-        if (total > 10 * 1024 * 1024) {
+        if (total > 4 * 1024 * 1024) {
           discarded = true;
           if (recording.state !== "inactive") recording.stop();
           report(
