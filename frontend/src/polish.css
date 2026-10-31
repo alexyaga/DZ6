@@ -1,0 +1,254 @@
+.hero .code-lines p {
+  margin: 0;
+  font:
+    10px/1.9 Consolas,
+    monospace;
+  color: #bcd3f7;
+  max-width: none;
+}
+.voice-spinner {
+  animation: voice-spin 1s linear infinite;
+}
+@keyframes voice-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.topbar-right {
+  gap: 14px;
+}
+.account-logout {
+  padding: 9px 13px;
+  border: 1px solid #cbdaf6;
+  border-radius: 8px;
+  color: #174db5;
+  background: #f1f5ff;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.account-logout:hover:not(:disabled) {
+  background: #e2ebff;
+  border-color: #93b4ef;
+}
+@media (max-width: 700px) {
+  .topbar-right {
+    gap: 8px;
+  }
+  .topbar-right .demo-indicator {
+    display: none;
+  }
+  .account-logout {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}
+.continue-grid:has(> .course-card:only-child) {
+  grid-template-columns: 1fr;
+}
+.course-title-button {
+  color: var(--blue);
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+  justify-content: flex-start;
+}
+.section-heading .primary {
+  color: white;
+}
+.course-title-button:hover {
+  text-decoration: underline;
+}
+.course-back {
+  margin-bottom: 18px;
+}
+.course-admin-summary > p {
+  font-size: 13px;
+  color: #637894;
+}
+.course-admin-summary > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  margin-top: 18px;
+}
+.course-admin-summary > div > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #637894;
+}
+.course-topic-list .topic-admin:first-child {
+  padding-top: 0;
+}
+.course-topic-list .topic-admin:last-child {
+  border: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.course-topic-list .topic-admin > span {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.course-topic-list b {
+  color: #7f9ac7;
+  font-size: 11px;
+}
+.course-schedule-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+.continue-grid:has(> .course-card:only-child) .course-cover {
+  height: 150px;
+}
+.continue-grid:has(> .course-card:only-child) .course-body > p {
+  min-height: 0;
+  max-width: 550px;
+}
+.ai-status-note {
+  font-size: 10px;
+  line-height: 1.7;
+  background: #fff8df;
+  color: #927427;
+  padding: 10px 18px;
+  border-bottom: 1px solid #f0e6c7;
+}
+.content > .alert.error {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 90;
+  max-width: min(600px, calc(100vw - 48px));
+  box-shadow: 0 8px 35px #061d4925;
+}
+@media (min-width: 1000px) {
+  .nav-item {
+    font-size: 12px;
+  }
+  .sidebar-user strong {
+    font-size: 12px;
+  }
+  .sidebar-user small {
+    font-size: 10px;
+  }
+  .breadcrumb,
+  .breadcrumb strong {
+    font-size: 11px;
+  }
+  .demo-indicator {
+    font-size: 10px;
+  }
+  .page-heading p {
+    font-size: 13px;
+  }
+  .hero p {
+    font-size: 12px;
+  }
+  .hero .white-button {
+    font-size: 12px;
+  }
+  .hero .yellow-label {
+    font-size: 9px;
+  }
+  .stat-card span:not(.stat-icon) {
+    font-size: 11px;
+  }
+  .stat-card small {
+    font-size: 9px;
+  }
+  .section-heading h2 {
+    font-size: 18px;
+  }
+  .section-heading button {
+    font-size: 11px;
+  }
+  .course-meta {
+    font-size: 10px;
+  }
+  .course-body h3 {
+    font-size: 19px;
+  }
+  .course-body > p {
+    font-size: 12px;
+    min-height: 65px;
+  }
+  .course-body > .course-link {
+    font-size: 12px;
+  }
+  .progress-label,
+  .progress-label strong {
+    font-size: 11px;
+  }
+  .upcoming-item h4 {
+    font-size: 13px;
+  }
+  .upcoming-item p {
+    font-size: 11px;
+  }
+  .upcoming-item div > small {
+    font-size: 10px;
+  }
+  .full-link {
+    font-size: 11px;
+  }
+  .mentor-card h3 {
+    font-size: 15px;
+  }
+  .mentor-card p,
+  .mentor-card button {
+    font-size: 11px;
+  }
+  .recommend-card small {
+    font-size: 10px;
+  }
+  .recommend-card h3 {
+    font-size: 16px;
+  }
+  .recommend-card p {
+    font-size: 11px;
+  }
+  .course-bottom .course-link {
+    font-size: 12px;
+  }
+  .cover-direction {
+    font-size: 9px;
+  }
+  table {
+    font-size: 12px;
+  }
+  th {
+    font-size: 11px;
+  }
+  td strong {
+    font-size: 13px;
+  }
+  td small {
+    font-size: 11px;
+  }
+  .badge,
+  .format-pill {
+    font-size: 11px !important;
+  }
+  .tabs button {
+    font-size: 12px;
+  }
+  .message-bubble {
+    font-size: 13px;
+  }
+  .conversation-item > button:first-child {
+    font-size: 11px;
+  }
+  .composer textarea,
+  .composer textarea::placeholder {
+    font-size: 12px;
+  }
+  .composer-note {
+    font-size: 9px;
+  }
+}
