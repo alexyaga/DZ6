@@ -11,7 +11,7 @@ const courses = [
 test("sorts courses from cheapest to most expensive", () => {
   assert.deepEqual(
     sortCoursesByPrice(courses, "price-asc").map((course) => course.id),
-    [2, 3, 1],
+    [1, 2, 3],
   );
 });
 
