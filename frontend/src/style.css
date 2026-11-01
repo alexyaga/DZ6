@@ -1118,6 +1118,22 @@ footer span:last-child {
   color: #8c97aa;
   max-width: 250px;
 }
+.catalog-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.catalog-sort {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: #34415a;
+  font-size: 11px;
+  cursor: pointer;
+}
 .search-input input {
   border: 0;
   padding: 10px 0;
@@ -2858,6 +2874,10 @@ td .format-pill {
   }
   .search-input {
     max-width: 100%;
+    width: 100%;
+  }
+  .catalog-controls,
+  .catalog-sort {
     width: 100%;
   }
   .subscription-card {
