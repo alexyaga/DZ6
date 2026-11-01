@@ -17,7 +17,7 @@ powershell -ExecutionPolicy Bypass -File .\Start.ps1
 
 Другой порт: `powershell -ExecutionPolicy Bypass -File .\Start.ps1 -Port 8010`.
 
-Учётные записи в Turso используют отдельные пароли. Локальный файл `data/vercel_credentials.txt` хранит актуальные данные для входа после их смены и не попадает в Git. Демо-пользователи в пустой базе Turso создаются только при явном `ALLOW_DEMO_SEED=1`.
+Для демонстрационных аккаунтов в Turso действуют пароли, показанные на странице входа. Демо-пользователи в пустой базе Turso создаются только при явном `ALLOW_DEMO_SEED=1`.
 
 ## Публикация на Vercel
 
