@@ -38,6 +38,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { api, setCsrf, money, date, fmt, status } from "./api";
+import { sortCoursesByPrice, type CourseSortOrder } from "./courseSort";
 
 import {
   Modal,
@@ -429,7 +430,8 @@ function Dashboard({ user, catalog, learning, go, propose }: any) {
 function Catalog({ catalog, learning, propose, go }: any) {
   const [query, setQuery] = useState(""),
     [tab, setTab] = useState("Все направления"),
-    [teachers, setTeachers] = useState(false);
+    [teachers, setTeachers] = useState(false),
+    [sortOrder, setSortOrder] = useState<CourseSortOrder>("default");
   const dirs = [
     "Все направления",
     ...new Set<string>(catalog.courses.map((c: any) => c.direction)),
@@ -462,14 +464,30 @@ function Catalog({ catalog, learning, propose, go }: any) {
             Преподаватели
           </button>
         </div>
-        <div className="search-input">
-          <Search size={17} />
-          <input
-            aria-label="Поиск курса"
-            placeholder="Найти курс…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+        <div className="catalog-controls">
+          <div className="search-input">
+            <Search size={17} />
+            <input
+              aria-label="Поиск курса"
+              placeholder="Найти курс…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+          {!teachers && (
+            <select
+              className="catalog-sort"
+              aria-label="Сортировка курсов"
+              value={sortOrder}
+              onChange={(event) =>
+                setSortOrder(event.target.value as CourseSortOrder)
+              }
+            >
+              <option value="default">По умолчанию</option>
+              <option value="price-asc">Сначала дешёвые</option>
+              <option value="price-desc">Сначала дорогие</option>
+            </select>
+          )}
         </div>
       </div>
       {teachers ? (
@@ -490,25 +508,26 @@ function Catalog({ catalog, learning, propose, go }: any) {
         </div>
       ) : (
         <div className="course-grid">
-          {catalog.courses
-            .filter(
+          {sortCoursesByPrice(
+            catalog.courses.filter(
               (c: any) =>
                 (tab === "Все направления" || c.direction === tab) &&
                 `${c.title} ${c.description}`
                   .toLowerCase()
                   .includes(query.toLowerCase()),
-            )
-            .map((c: any) => (
-              <CourseCard
-                key={c.id}
-                course={c}
-                enrollment={learning.enrollments.find(
-                  (e: any) => e.course_id === c.id,
-                )}
-                onContinue={() => go("learning")}
-                onBuy={() => propose("buy_course", c.id)}
-              />
-            ))}
+            ),
+            sortOrder,
+          ).map((c: any) => (
+            <CourseCard
+              key={c.id}
+              course={c}
+              enrollment={learning.enrollments.find(
+                (e: any) => e.course_id === c.id,
+              )}
+              onContinue={() => go("learning")}
+              onBuy={() => propose("buy_course", c.id)}
+            />
+          ))}
         </div>
       )}
     </>

@@ -1,0 +1,45 @@
+name: Проверка проекта
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Сортировка и сборка интерфейса
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Установить зависимости интерфейса
+        run: pnpm install --frozen-lockfile
+      - name: Проверить сортировку курсов
+        run: pnpm test:sort
+      - name: Собрать интерфейс
+        run: pnpm build
+
+  backend:
+    name: Проверка API
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Установить зависимости API
+        run: python -m pip install -r backend/requirements.txt
+      - name: Запустить тесты API
+        run: python -m pytest -q
